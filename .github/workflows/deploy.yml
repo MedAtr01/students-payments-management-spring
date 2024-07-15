@@ -22,30 +22,33 @@ jobs:
       - name: Build with Maven
         run: mvn clean package
 
-      - name: Copy .env to build directory
-        run: cp .env target/
-
       - name: Deploy to EC2
         env:
           AWS_SSH_KEY_BASE64: ${{ secrets.AWS_SSH_KEY_BASE64 }}
           USER: ec2-user
           HOST: ${{ secrets.AWS_EC2_HOST }}
-          DB_URL: ${{ secrets.SPRING_DATASOURCE_URL }}
-          DB_USERNAME: ${{ secrets.SPRING_DATASOURCE_USERNAME }}
-          DB_PASSWORD: ${{ secrets.SPRING_DATASOURCE_PASSWORD }}
+          SPRING_DATASOURCE_URL: ${{ secrets.SPRING_DATASOURCE_URL }}
+          SPRING_DATASOURCE_USERNAME: ${{ secrets.SPRING_DATASOURCE_USERNAME }}
+          SPRING_DATASOURCE_PASSWORD: ${{ secrets.SPRING_DATASOURCE_PASSWORD }}
+          SPRING_MAIL_USERNAME: ${{ secrets.SPRING_MAIL_USERNAME }}
+          SPRING_MAIL_PASSWORD: ${{ secrets.SPRING_MAIL_PASSWORD }}
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
+          APPLICATION_MAILING_FRONTEND_ACTIVATION_URL: ${{ secrets.APPLICATION_MAILING_FRONTEND_ACTIVATION_URL }}
           JAR_FILE: target/Students-Payments-Management-0.0.1-SNAPSHOT.jar
         run: |
           echo "$AWS_SSH_KEY_BASE64" | base64 -d > key.pem
           chmod 400 key.pem
           scp -i key.pem $JAR_FILE $USER@$HOST:/home/$USER/
-          scp -i key.pem target/.env $USER@$HOST:/home/$USER/
           ssh -i key.pem $USER@$HOST << 'EOF'
+            export SPRING_DATASOURCE_URL="${SPRING_DATASOURCE_URL}"
+            export SPRING_DATASOURCE_USERNAME="${SPRING_DATASOURCE_USERNAME}"
+            export SPRING_DATASOURCE_PASSWORD="${SPRING_DATASOURCE_PASSWORD}"
+            export SPRING_MAIL_USERNAME="${SPRING_MAIL_USERNAME}"
+            export SPRING_MAIL_PASSWORD="${SPRING_MAIL_PASSWORD}"
+            export JWT_SECRET="${JWT_SECRET}"
+            export APPLICATION_MAILING_FRONTEND_ACTIVATION_URL="${APPLICATION_MAILING_FRONTEND_ACTIVATION_URL}"
             pkill -f 'java -jar'
-            nohup java -jar /home/$USER/Students-Payments-Management-0.0.1-SNAPSHOT.jar \
-              --spring.datasource.url="$SPRING_DATASOURCE_URL" \
-              --spring.datasource.username="$SPRING_DATASOURCE_USERNAME" \
-              --spring.datasource.password="$SPRING_DATASOURCE_PASSWORD" \
-            &
+            nohup java -jar /home/$USER/Students-Payments-Management-0.0.1-SNAPSHOT.jar &
             exit
           EOF
         shell: bash
