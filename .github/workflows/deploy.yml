@@ -52,8 +52,25 @@ jobs:
             export SPRING_MAIL_PASSWORD="${SPRING_MAIL_PASSWORD}"
             export JWT_SECRET="${JWT_SECRET}"
             export APPLICATION_MAILING_FRONTEND_ACTIVATION_URL="${APPLICATION_MAILING_FRONTEND_ACTIVATION_URL}"
+          
+            echo "SPRING_DATASOURCE_URL=${SPRING_DATASOURCE_URL}"
+            echo "SPRING_DATASOURCE_USERNAME=${SPRING_DATASOURCE_USERNAME}"
+            echo "SPRING_DATASOURCE_PASSWORD=${SPRING_DATASOURCE_PASSWORD}"
+            echo "SPRING_MAIL_USERNAME=${SPRING_MAIL_USERNAME}"
+            echo "SPRING_MAIL_PASSWORD=${SPRING_MAIL_PASSWORD}"
+            echo "JWT_SECRET=${JWT_SECRET}"
+            echo "APPLICATION_MAILING_FRONTEND_ACTIVATION_URL=${APPLICATION_MAILING_FRONTEND_ACTIVATION_URL}"
+          
             pkill -f 'java -jar'
-            nohup java -jar /home/$USER/Students-Payments-Management-0.0.1-SNAPSHOT.jar &
+            nohup java -jar /home/$USER/Students-Payments-Management-0.0.1-SNAPSHOT.jar \
+              --spring.datasource.url="${SPRING_DATASOURCE_URL}" \
+              --spring.datasource.username="${SPRING_DATASOURCE_USERNAME}" \
+              --spring.datasource.password="${SPRING_DATASOURCE_PASSWORD}" \
+              --spring.mail.username="${SPRING_MAIL_USERNAME}" \
+              --spring.mail.password="${SPRING_MAIL_PASSWORD}" \
+              --jwt.secret="${JWT_SECRET}" \
+              --application.mailing.frontend.activation-url="${APPLICATION_MAILING_FRONTEND_ACTIVATION_URL}" \
+            &
             exit
           EOF
         shell: bash
