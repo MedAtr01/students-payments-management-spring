@@ -24,7 +24,6 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import static net.sf.jsqlparser.parser.feature.Feature.use;
 
 @Service
 @RequiredArgsConstructor
