@@ -39,7 +39,8 @@ jobs:
           echo "$AWS_SSH_KEY_BASE64" | base64 -d > key.pem
           chmod 400 key.pem
           
-          # Add the EC2 instance to known_hosts to avoid host key verification error
+          # Create the .ssh directory and add the EC2 instance to known_hosts
+          mkdir -p ~/.ssh
           ssh-keyscan $HOST >> ~/.ssh/known_hosts
           
           scp -i key.pem $JAR_FILE $USER@$HOST:/home/$USER/
