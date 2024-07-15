@@ -22,52 +22,48 @@ jobs:
       - name: Build with Maven
         run: mvn clean package
 
-      - name: Create .env file
-        run: |
-          echo "SPRING_DATASOURCE_URL=${{ secrets.SPRING_DATASOURCE_URL }}" > .env
-          echo "SPRING_DATASOURCE_USERNAME=${{ secrets.SPRING_DATASOURCE_USERNAME }}" >> .env
-          echo "SPRING_DATASOURCE_PASSWORD=${{ secrets.SPRING_DATASOURCE_PASSWORD }}" >> .env
-          echo "SPRING_MAIL_USERNAME=${{ secrets.SPRING_MAIL_USERNAME }}" >> .env
-          echo "SPRING_MAIL_PASSWORD=${{ secrets.SPRING_MAIL_PASSWORD }}" >> .env
-          echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" >> .env
-          echo "APPLICATION_MAILING_FRONTEND_ACTIVATION_URL=${{ secrets.APPLICATION_MAILING_FRONTEND_ACTIVATION_URL }}" >> .env
-
       - name: Deploy to EC2
         env:
           AWS_SSH_KEY_BASE64: ${{ secrets.AWS_SSH_KEY_BASE64 }}
           USER: ec2-user
           HOST: ${{ secrets.AWS_EC2_HOST }}
+          SPRING_DATASOURCE_URL: ${{ secrets.SPRING_DATASOURCE_URL }}
+          SPRING_DATASOURCE_USERNAME: ${{ secrets.SPRING_DATASOURCE_USERNAME }}
+          SPRING_DATASOURCE_PASSWORD: ${{ secrets.SPRING_DATASOURCE_PASSWORD }}
+          SPRING_MAIL_USERNAME: ${{ secrets.SPRING_MAIL_USERNAME }}
+          SPRING_MAIL_PASSWORD: ${{ secrets.SPRING_MAIL_PASSWORD }}
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
+          APPLICATION_MAILING_FRONTEND_ACTIVATION_URL: ${{ secrets.APPLICATION_MAILING_FRONTEND_ACTIVATION_URL }}
           JAR_FILE: target/Students-Payments-Management-0.0.1-SNAPSHOT.jar
         run: |
           echo "$AWS_SSH_KEY_BASE64" | base64 -d > key.pem
           chmod 400 key.pem
-          
+
           # Create the .ssh directory and add the EC2 instance to known_hosts
           mkdir -p ~/.ssh
           ssh-keyscan $HOST >> ~/.ssh/known_hosts
-          
-          # Transfer JAR file and .env file to the EC2 instance
+
+          # Transfer JAR file to the EC2 instance
           scp -i key.pem $JAR_FILE $USER@$HOST:/home/$USER/
-          scp -i key.pem .env $USER@$HOST:/home/$USER/
-          
+
+          # Connect to the EC2 instance and create the .env file
           ssh -i key.pem $USER@$HOST << 'EOF'
+            echo "SPRING_DATASOURCE_URL=$SPRING_DATASOURCE_URL" > /home/$USER/.env
+            echo "SPRING_DATASOURCE_USERNAME=$SPRING_DATASOURCE_USERNAME" >> /home/$USER/.env
+            echo "SPRING_DATASOURCE_PASSWORD=$SPRING_DATASOURCE_PASSWORD" >> /home/$USER/.env
+            echo "SPRING_MAIL_USERNAME=$SPRING_MAIL_USERNAME" >> /home/$USER/.env
+            echo "SPRING_MAIL_PASSWORD=$SPRING_MAIL_PASSWORD" >> /home/$USER/.env
+            echo "JWT_SECRET=$JWT_SECRET" >> /home/$USER/.env
+            echo "APPLICATION_MAILING_FRONTEND_ACTIVATION_URL=$APPLICATION_MAILING_FRONTEND_ACTIVATION_URL" >> /home/$USER/.env
+
             # Source the .env file
             set -a
             source /home/$USER/.env
             set +a
-          
-            # Log the values for verification (optional, for debugging purposes)
-            echo "SPRING_DATASOURCE_URL=$SPRING_DATASOURCE_URL"
-            echo "SPRING_DATASOURCE_USERNAME=$SPRING_DATASOURCE_USERNAME"
-            echo "SPRING_DATASOURCE_PASSWORD=$SPRING_DATASOURCE_PASSWORD"
-            echo "SPRING_MAIL_USERNAME=$SPRING_MAIL_USERNAME"
-            echo "SPRING_MAIL_PASSWORD=$SPRING_MAIL_PASSWORD"
-            echo "JWT_SECRET=$JWT_SECRET"
-            echo "APPLICATION_MAILING_FRONTEND_ACTIVATION_URL=$APPLICATION_MAILING_FRONTEND_ACTIVATION_URL"
-          
+
             # Stop any running instances of the application
             pkill -f 'java -jar'
-          
+
             # Start the application with environment variables
             nohup java -jar /home/$USER/Students-Payments-Management-0.0.1-SNAPSHOT.jar \
               --spring.datasource.url="$SPRING_DATASOURCE_URL" \
