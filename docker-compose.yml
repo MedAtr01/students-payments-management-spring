@@ -1,0 +1,37 @@
+version: '3.8'
+
+services:
+  spring-app:
+    container_name: spring-app
+    build:
+      context: .
+      dockerfile: Dockerfile-spring
+    platform: linux/amd64
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://${DB_URL}
+      SPRING_DATASOURCE_USERNAME: ${DB_USERNAME}
+      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD}
+      SPRING_MAIL_HOST: smtp.gmail.com
+      SPRING_MAIL_PORT: 587
+      SPRING_MAIL_USERNAME: ${GMAIL_USERNAME}
+      SPRING_MAIL_PASSWORD: ${GMAIL_PASSWORD}
+      SPRING_MAIL_PROPERTIES_MAIL_SMTP_AUTH: true
+      SPRING_MAIL_PROPERTIES_MAIL_SMTP_STARTTLS_ENABLE: true
+      SPRING_MAIL_PROPERTIES_MAIL_SMTP_STARTTLS_REQUIRED: true
+    ports:
+      - "8020:8020"
+    volumes:
+      - uploads:/app/uploads
+    networks:
+      - spring-sp
+    restart: unless-stopped
+
+
+
+networks:
+  spring-sp:
+    driver: bridge
+
+volumes:
+  uploads:
+    driver: local

@@ -1,0 +1,17 @@
+# Stage 1: Build the Spring application
+FROM maven:3.8.5-openjdk-17 AS build
+WORKDIR /app
+COPY pom.xml .
+COPY src ./src
+RUN mvn clean package -DskipTests
+
+# Stage 2: Run the Spring application
+FROM openjdk:17-jdk-slim
+WORKDIR /app
+# Create the uploads directory
+RUN mkdir -p /app/uploads/data/profiles
+RUN mkdir -p /app/uploads/data/payments
+RUN  chmod -R 755 /app/uploads
+
+COPY --from=build /app/target/Students-Payments-Management-0.0.1-SNAPSHOT.jar app.jar
+ENTRYPOINT ["java", "-jar", "app.jar"]
