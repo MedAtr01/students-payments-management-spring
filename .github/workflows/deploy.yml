@@ -30,6 +30,9 @@ jobs:
           AWS_SSH_KEY_BASE64: ${{ secrets.AWS_SSH_KEY_BASE64 }}
           USER: ec2-user
           HOST: ${{ secrets.AWS_EC2_HOST }}
+          DB_URL: ${{ secrets.DB_URL }}
+          DB_USERNAME: ${{ secrets.DB_USERNAME }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
           JAR_FILE: target/Students-Payments-Management-0.0.1-SNAPSHOT.jar
         run: |
           echo "$AWS_SSH_KEY_BASE64" | base64 -d > key.pem
@@ -38,7 +41,11 @@ jobs:
           scp -i key.pem target/.env $USER@$HOST:/home/$USER/
           ssh -i key.pem $USER@$HOST << 'EOF'
             pkill -f 'java -jar'
-            nohup java -jar /home/$USER/Students-Payments-Management-0.0.1-SNAPSHOT.jar &
+            nohup java -jar /home/$USER/Students-Payments-Management-0.0.1-SNAPSHOT.jar \
+              --spring.datasource.url="$DB_URL" \
+              --spring.datasource.username="$DB_USERNAME" \
+              --spring.datasource.password="$DB_PASSWORD" \
+            &
             exit
           EOF
         shell: bash
