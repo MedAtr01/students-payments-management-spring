@@ -4,7 +4,7 @@ target/
 !**/src/main/**/target/
 !**/src/test/**/target/
 ./ui-angular/
-
+./src/main/resources/application-test.properties
 ### STS ###
 .apt_generated
 .classpath
