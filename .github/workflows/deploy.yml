@@ -30,9 +30,9 @@ jobs:
           AWS_SSH_KEY_BASE64: ${{ secrets.AWS_SSH_KEY_BASE64 }}
           USER: ec2-user
           HOST: ${{ secrets.AWS_EC2_HOST }}
-          DB_URL: ${{ secrets.DB_URL }}
-          DB_USERNAME: ${{ secrets.DB_USERNAME }}
-          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          DB_URL: ${{ secrets.SPRING_DATASOURCE_URL }}
+          DB_USERNAME: ${{ secrets.SPRING_DATASOURCE_USERNAME }}
+          DB_PASSWORD: ${{ secrets.SPRING_DATASOURCE_PASSWORD }}
           JAR_FILE: target/Students-Payments-Management-0.0.1-SNAPSHOT.jar
         run: |
           echo "$AWS_SSH_KEY_BASE64" | base64 -d > key.pem
@@ -42,9 +42,9 @@ jobs:
           ssh -i key.pem $USER@$HOST << 'EOF'
             pkill -f 'java -jar'
             nohup java -jar /home/$USER/Students-Payments-Management-0.0.1-SNAPSHOT.jar \
-              --spring.datasource.url="$DB_URL" \
-              --spring.datasource.username="$DB_USERNAME" \
-              --spring.datasource.password="$DB_PASSWORD" \
+              --spring.datasource.url="$SPRING_DATASOURCE_URL" \
+              --spring.datasource.username="$SPRING_DATASOURCE_USERNAME" \
+              --spring.datasource.password="$SPRING_DATASOURCE_PASSWORD" \
             &
             exit
           EOF
