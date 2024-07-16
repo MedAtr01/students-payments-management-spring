@@ -17,7 +17,7 @@ public class StudentsPaymentsManagementApplication {
 
     public static void main(String[] args) {
 
-        Dotenv dotenv = Dotenv.load();
+        Dotenv dotenv = Dotenv.configure().directory("/home/ec2-user").load();
 
         System.setProperty("spring.datasource.url", Objects.requireNonNull(dotenv.get("SPRING_DATASOURCE_URL")));
         System.setProperty("spring.datasource.username", Objects.requireNonNull(dotenv.get("SPRING_DATASOURCE_USERNAME")));
