@@ -47,22 +47,21 @@ jobs:
           scp -i key.pem $JAR_FILE $USER@$HOST:/home/$USER/
 
           # Connect to the EC2 instance and create the .env file
-          ssh -i key.pem $USER@$HOST << 'EOF'
-            echo "SPRING_DATASOURCE_URL=$SPRING_DATASOURCE_URL" > /home/$USER/.env
-            echo "SPRING_DATASOURCE_USERNAME=$SPRING_DATASOURCE_USERNAME" >> /home/$USER/.env
-            echo "SPRING_DATASOURCE_PASSWORD=$SPRING_DATASOURCE_PASSWORD" >> /home/$USER/.env
-            echo "SPRING_MAIL_USERNAME=$SPRING_MAIL_USERNAME" >> /home/$USER/.env
-            echo "SPRING_MAIL_PASSWORD=$SPRING_MAIL_PASSWORD" >> /home/$USER/.env
-            echo "JWT_SECRET=$JWT_SECRET" >> /home/$USER/.env
-            echo "APPLICATION_MAILING_FRONTEND_ACTIVATION_URL=$APPLICATION_MAILING_FRONTEND_ACTIVATION_URL" >> /home/$USER/.env
-          
+          ssh -i key.pem -t $USER@$HOST << EOF
+            echo "SPRING_DATASOURCE_URL=${{ secrets.SPRING_DATASOURCE_URL }}" > /home/$USER/.env
+            echo "SPRING_DATASOURCE_USERNAME=${{ secrets.SPRING_DATASOURCE_USERNAME }}" >> /home/$USER/.env
+            echo "SPRING_DATASOURCE_PASSWORD=${{ secrets.SPRING_DATASOURCE_PASSWORD }}" >> /home/$USER/.env
+            echo "SPRING_MAIL_USERNAME=${{ secrets.SPRING_MAIL_USERNAME }}" >> /home/$USER/.env
+            echo "SPRING_MAIL_PASSWORD=${{ secrets.SPRING_MAIL_PASSWORD }}" >> /home/$USER/.env
+            echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" >> /home/$USER/.env
+            echo "APPLICATION_MAILING_FRONTEND_ACTIVATION_URL=${{ secrets.APPLICATION_MAILING_FRONTEND_ACTIVATION_URL }}" >> /home/$USER/.env
           
             # Stop any running instances of the application
             pkill -f 'java -jar'
 
             # Start the application with environment variables
             nohup java -jar /home/$USER/Students-Payments-Management-0.0.1-SNAPSHOT.jar & 
-                          
+          
             exit
           EOF
         shell: bash
