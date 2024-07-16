@@ -55,25 +55,14 @@ jobs:
             echo "SPRING_MAIL_PASSWORD=$SPRING_MAIL_PASSWORD" >> /home/$USER/.env
             echo "JWT_SECRET=$JWT_SECRET" >> /home/$USER/.env
             echo "APPLICATION_MAILING_FRONTEND_ACTIVATION_URL=$APPLICATION_MAILING_FRONTEND_ACTIVATION_URL" >> /home/$USER/.env
-
-            # Source the .env file
-            set -a
-            source /home/$USER/.env
-            set +a
-
+          
+          
             # Stop any running instances of the application
             pkill -f 'java -jar'
 
             # Start the application with environment variables
-            nohup java -jar /home/$USER/Students-Payments-Management-0.0.1-SNAPSHOT.jar \
-              --spring.datasource.url="$SPRING_DATASOURCE_URL" \
-              --spring.datasource.username="$SPRING_DATASOURCE_USERNAME" \
-              --spring.datasource.password="$SPRING_DATASOURCE_PASSWORD" \
-              --spring.mail.username="$SPRING_MAIL_USERNAME" \
-              --spring.mail.password="$SPRING_MAIL_PASSWORD" \
-              --jwt.secret="$JWT_SECRET" \
-              --application.mailing.frontend.activation-url="$APPLICATION_MAILING_FRONTEND_ACTIVATION_URL" \
-            &
+            nohup java -jar /home/$USER/Students-Payments-Management-0.0.1-SNAPSHOT.jar 
+                &
             exit
           EOF
         shell: bash
